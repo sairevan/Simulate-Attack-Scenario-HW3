@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attack Simulation Process</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 20px;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        label {
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 70%;
+            margin: 0 auto;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Simulate Attack Scenario</h2>
+
+    <!-- Input fields for parameters -->
+    <div class="input-group">
+        <label for="timeDuration">Total Duration (T):</label>
+        <input type="number" id="timeDuration" value="10" min="1" step="any">
+    </div>
+    
+    <div class="input-group">
+        <label for="intervals">Number of Time Intervals (n):</label>
+        <input type="number" id="intervals" value="1000" min="1">
+    </div>
+    
+    <div class="input-group">
+        <label for="attackRate">Attack Rate (λ):</label>
+        <input type="number" id="attackRate" value="2" min="0" step="any">
+    </div>
+
+    <!-- Button to start simulation -->
+    <button onclick="runSimulation()">Start Simulation</button>
+
+    <!-- Canvas to display Chart.js Graph -->
+    <div class="chart-container">
+        <canvas id="attackSimulationChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Function to run the simulation
+    function runSimulation() {
+        const totalDuration = parseFloat(document.getElementById("timeDuration").value);
+        const numIntervals = parseInt(document.getElementById("intervals").value);
+        const attackRate = parseFloat(document.getElementById("attackRate").value);
+        
+        const deltaT = totalDuration / numIntervals;
+        const timePoints = [];
+        const processValues = [];
+        
+        let attackCount = 0;
+        
+        // Simulate the attack process
+        for (let i = 0; i <= numIntervals; i++) {
+            // Determine if an attack happens in this interval
+            const attackHappened = Math.random() < attackRate * deltaT;
+            
+            if (attackHappened) {
+                attackCount += 1;
+            }
+            
+            // Save time and process value
+            timePoints.push(i * deltaT);
+            processValues.push(attackCount);
+        }
+        
+        // Update the chart with simulation results
+        displayChart(timePoints, processValues);
+    }
+
+    // Function to update the chart with new data
+    function displayChart(timePoints, processValues) {
+        const ctx = document.getElementById('attackSimulationChart').getContext('2d');
+
+        // Create a new chart with updated data
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timePoints,
+                datasets: [{
+                    label: 'Accumulated Attacks Over Time',
+                    data: processValues,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (s)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Attacks'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
